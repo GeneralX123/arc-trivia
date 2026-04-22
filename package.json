@@ -24,7 +24,6 @@
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.15.9",
-    "@nomicfoundation/hardhat-toolbox": "^6.1.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -32,9 +31,7 @@
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
-    "hardhat": "^3.4.0",
     "tailwindcss": "^4",
-    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
