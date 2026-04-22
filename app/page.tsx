@@ -63,7 +63,7 @@ export default function LandingPage() {
               </div>
               <div className="flex-1">
                 <p className="text-xs text-indigo-400/60 uppercase tracking-widest mb-2">Connect Wallet</p>
-                <ConnectButton />
+                <ConnectButton showBalance={false} />
               </div>
             </div>
 

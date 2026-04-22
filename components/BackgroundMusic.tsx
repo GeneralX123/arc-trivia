@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-const TRACK_SRC = "/music/MIABKP.mp3";
+const TRACK_SRC = "/Music/MIABKP.mp3";
 
 export function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement>(null);
