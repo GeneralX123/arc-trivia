@@ -49,7 +49,7 @@ export default function GamePage() {
     args: address ? [address] : undefined,
     query: { enabled: !!address && !!CONTRACT_ADDRESS },
   });
-  const hasMinted = !!(playerOnChain as unknown[])?.[1];
+  const hasMinted = !!(playerOnChain as unknown as unknown[])?.[1];
 
   useEffect(() => {
     if (status === "reconnecting" || status === "connecting") return;
