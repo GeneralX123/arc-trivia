@@ -59,7 +59,17 @@ export default function GamePage() {
         body: JSON.stringify({ walletAddress: address, checkOnly: true }),
       });
       const data = await res.json();
-      if (data.error === "Already played") { setPhase("already_played"); return; }
+      if (data.error === "Already played") {
+        // Fetch result so we can show mint button if not yet minted
+        const finishRes = await fetch("/api/game/finish", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ walletAddress: address }),
+        });
+        const finishData = await finishRes.json();
+        if (finishData.score !== undefined) setResult(finishData);
+        setPhase("already_played");
+        return;
+      }
       setPhase("paying");
     }
     checkPlayed();
@@ -192,19 +202,42 @@ export default function GamePage() {
 
   if (phase === "loading") return <Shell><Spinner /></Shell>;
 
-  if (phase === "already_played") return (
-    <Shell>
-      <div className="max-w-sm w-full text-center space-y-5">
-        <div className="text-5xl">🎉</div>
-        <h2 className="text-2xl font-black leading-snug">Thanks for playing<br />Arc Trivia 1.0!</h2>
-        <p className="text-indigo-200/60 text-sm">You&apos;ve completed the game and minted your Soulbound NFT. Your place on the leaderboard is secured.</p>
-        <button onClick={() => router.push("/profile")} className="btn-primary">View your SBT →</button>
-        <button onClick={() => router.push("/leaderboard")} className="w-full text-indigo-400 hover:text-indigo-300 text-sm underline">
-          See the leaderboard →
-        </button>
-      </div>
-    </Shell>
-  );
+  if (phase === "already_played") {
+    const alreadyTier = result ? TIERS[result.tier] : null;
+    const shareText = result ? encodeURIComponent(`I just played Arc Trivia 1.0 and earned the "${alreadyTier?.name}" SBT with a score of ${result.score}/20! 🎮 Are you an Arc Maxi? #ArcTrivia #ArcNetwork`) : "";
+    const shareUrl = encodeURIComponent(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/share/${address}`);
+    return (
+      <Shell>
+        <div className="max-w-sm w-full text-center space-y-5">
+          <div className="text-5xl">🎉</div>
+          <h2 className="text-2xl font-black leading-snug">Thanks for playing<br />Arc Trivia 1.0!</h2>
+          {result && alreadyTier && (
+            <div className="glass-card p-6 space-y-3">
+              <Image src={alreadyTier.image} alt={alreadyTier.name} width={120} height={120} className="mx-auto object-contain" />
+              <p className="text-xl font-bold text-indigo-300">{alreadyTier.name}</p>
+              <p className="text-4xl font-black">{result.score}<span className="text-indigo-400 text-xl">/20</span></p>
+            </div>
+          )}
+          {result && !result.minted && (
+            <MintButton score={result.score} tierId={result.tier} signature={result.signature} address={address!} />
+          )}
+          {result && result.minted && (
+            <p className="text-green-400 text-sm font-semibold">✓ SBT already minted on-chain</p>
+          )}
+          {result && (
+            <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} target="_blank" rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full border border-zinc-700 hover:border-zinc-500 text-white py-3 rounded-xl transition text-sm">
+              <span className="font-bold">𝕏</span> Share on X
+            </a>
+          )}
+          <button onClick={() => router.push("/profile")} className="btn-primary">View your SBT →</button>
+          <button onClick={() => router.push("/leaderboard")} className="w-full text-indigo-400 hover:text-indigo-300 text-sm underline">
+            See the leaderboard →
+          </button>
+        </div>
+      </Shell>
+    );
+  }
 
   if (phase === "paying") return (
     <Shell>

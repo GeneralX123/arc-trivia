@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   const { data: player } = await supabaseAdmin
     .from("players")
-    .select("score, game_completed")
+    .select("score, game_completed, sbt_minted")
     .eq("wallet_address", walletAddress.toLowerCase())
     .single();
 
@@ -38,5 +38,5 @@ export async function POST(req: NextRequest) {
   );
   const signature = await signer.signMessage(ethers.getBytes(messageHash));
 
-  return NextResponse.json({ score, tier: tier.id, tierName: tier.name, signature });
+  return NextResponse.json({ score, tier: tier.id, tierName: tier.name, signature, minted: !!player.sbt_minted });
 }
