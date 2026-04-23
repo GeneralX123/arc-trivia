@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Arc Trivia 1.0",
   description: "The official Arc Network blockchain quiz game. Play once. Earn your SBT.",
-  icons: { icon: "/logo.png", apple: "/logo.png" },
+  icons: { icon: "/favicon.ico", apple: "/logo.png" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
