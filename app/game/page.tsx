@@ -52,6 +52,7 @@ export default function GamePage() {
   const hasMinted = !!(playerOnChain as unknown as unknown[])?.[1];
 
   useEffect(() => {
+    if (status === "disconnected") { router.push("/"); return; }
     if (status === "reconnecting" || status === "connecting") return;
     if (sessionStatus === "loading") return;
     if (!isConnected || !session?.user?.xUsername) router.push("/");

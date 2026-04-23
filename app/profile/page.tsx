@@ -24,6 +24,7 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
+    if (status === "disconnected") { router.push("/"); return; }
     if (status === "reconnecting" || status === "connecting") return;
     if (sessionStatus === "loading") return;
     if (!isConnected || !session?.user?.xUsername) router.push("/");

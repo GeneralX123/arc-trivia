@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation";
 import { GameBackground } from "@/components/GameBackground";
 import { Sidebar } from "@/components/Sidebar";
 import { TopBar } from "@/components/TopBar";
@@ -9,8 +11,14 @@ import { TIERS } from "@/lib/tiers";
 type Entry = { id: number; name: string; image: string; count: number };
 
 export default function LeaderboardPage() {
+  const { status } = useAccount();
+  const router = useRouter();
   const [data, setData] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (status === "disconnected") { router.push("/"); return; }
+  }, [status, router]);
 
   useEffect(() => {
     fetch("/api/leaderboard").then(r => r.json()).then(d => { setData(d.leaderboard); setLoading(false); });
