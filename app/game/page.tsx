@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { parseEther } from "viem";
@@ -41,6 +41,15 @@ export default function GamePage() {
 
   const { writeContract, data: txHash } = useWriteContract();
   const { isSuccess: paymentConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
+
+  const { data: playerOnChain, refetch: refetchOnChain } = useReadContract({
+    address: CONTRACT_ADDRESS,
+    abi: ARC_TRIVIA_ABI,
+    functionName: "players",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address && !!CONTRACT_ADDRESS },
+  });
+  const hasMinted = !!(playerOnChain as unknown[])?.[1];
 
   useEffect(() => {
     if (status === "reconnecting" || status === "connecting") return;
@@ -230,8 +239,11 @@ export default function GamePage() {
               <p className="text-4xl font-black">{result.score}<span className="text-indigo-400 text-xl">/20</span></p>
             </div>
           )}
-          {result && (
-            <MintButton score={result.score} tierId={result.tier} signature={result.signature} address={address!} />
+          {result && !hasMinted && (
+            <MintButton score={result.score} tierId={result.tier} signature={result.signature} address={address!} onMinted={() => refetchOnChain()} />
+          )}
+          {hasMinted && (
+            <p className="text-green-400 text-sm font-semibold">✓ SBT minted on-chain</p>
           )}
           {result && (
             <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} target="_blank" rel="noopener noreferrer"
@@ -308,7 +320,10 @@ export default function GamePage() {
             <p className="text-2xl font-bold text-indigo-300">{tier.name}</p>
             <p className="text-5xl font-black">{result.score}<span className="text-indigo-400 text-2xl">/20</span></p>
           </div>
-          <MintButton score={result.score} tierId={result.tier} signature={result.signature} address={address!} />
+          {!hasMinted
+            ? <MintButton score={result.score} tierId={result.tier} signature={result.signature} address={address!} onMinted={() => refetchOnChain()} />
+            : <p className="text-green-400 text-sm font-semibold">✓ SBT minted on-chain</p>
+          }
           <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} target="_blank" rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full border border-zinc-700 hover:border-zinc-500 text-white py-3 rounded-xl transition text-sm">
             <span className="font-bold">𝕏</span> Share on X
@@ -449,9 +464,10 @@ export default function GamePage() {
   return <Shell><Spinner /></Shell>;
 }
 
-function MintButton({ score, tierId, signature, address }: { score: number; tierId: number; signature: string; address: string }) {
+function MintButton({ score, tierId, signature, address, onMinted }: { score: number; tierId: number; signature: string; address: string; onMinted?: () => void }) {
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
+  useEffect(() => { if (isSuccess && onMinted) onMinted(); }, [isSuccess]);
   if (isSuccess) return <p className="text-green-400 font-semibold py-3">✓ SBT Minted successfully!</p>;
   return (
     <button disabled={isPending || !CONTRACT_ADDRESS}
