@@ -13,7 +13,7 @@ import { TopBar } from "@/components/TopBar";
 import Image from "next/image";
 
 type Question = { id: number; question: string; options: { label: string; text: string }[] };
-type Phase = "loading" | "paying" | "waiting_payment" | "countdown" | "playing" | "finished" | "already_played";
+type Phase = "loading" | "paying" | "waiting_payment" | "countdown" | "playing" | "finished" | "already_played" | "x_taken";
 type PowerUps = { skip: boolean; extraTime: boolean; fiftyFifty: boolean };
 
 export default function GamePage() {
@@ -70,8 +70,8 @@ export default function GamePage() {
         body: JSON.stringify({ walletAddress: address, checkOnly: true }),
       });
       const data = await res.json();
+      if (data.error === "X account already used") { setPhase("x_taken"); return; }
       if (data.error === "Already played") {
-        // Fetch result so we can show mint button if not yet minted
         const finishRes = await fetch("/api/game/finish", {
           method: "POST", headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ walletAddress: address }),
@@ -112,6 +112,7 @@ export default function GamePage() {
       body: JSON.stringify({ walletAddress: address }),
     });
     const data = await res.json();
+    if (data.error === "X account already used") { setPhase("x_taken"); return; }
     if (data.error === "Already played") { setPhase("already_played"); return; }
     setQuestions(data.questions);
     setReserveQuestions(data.reserve ?? []);
@@ -263,6 +264,20 @@ export default function GamePage() {
       </Shell>
     );
   }
+
+  if (phase === "x_taken") return (
+    <Shell>
+      <div className="max-w-sm w-full text-center space-y-5">
+        <div className="text-5xl">⚠️</div>
+        <h2 className="text-2xl font-black leading-snug">X Account Already Used</h2>
+        <p className="text-indigo-200/60 text-sm">
+          @{session?.user?.xUsername} has already played Arc Trivia 1.0 on a different wallet.<br /><br />
+          Each X account can only play once.
+        </p>
+        <button onClick={() => router.push("/")} className="btn-primary">Back to Home →</button>
+      </div>
+    </Shell>
+  );
 
   if (phase === "paying") return (
     <Shell>

@@ -28,6 +28,11 @@ export async function POST(req: NextRequest) {
     .eq("game_completed", true)
     .maybeSingle();
 
+  // X account played on a different wallet
+  if (existingByX && existingByX.wallet_address !== walletAddress.toLowerCase()) {
+    return NextResponse.json({ error: "X account already used" }, { status: 403 });
+  }
+
   const existing = existingByWallet ?? existingByX;
 
   if (existing?.game_completed) {
