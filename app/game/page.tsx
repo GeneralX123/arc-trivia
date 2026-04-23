@@ -18,7 +18,7 @@ type PowerUps = { skip: boolean; extraTime: boolean; fiftyFifty: boolean };
 
 export default function GamePage() {
   const { address, isConnected, status } = useAccount();
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>("loading");
@@ -43,8 +43,9 @@ export default function GamePage() {
 
   useEffect(() => {
     if (status === "reconnecting" || status === "connecting") return;
+    if (sessionStatus === "loading") return;
     if (!isConnected || !session?.user?.xUsername) router.push("/");
-  }, [isConnected, session, router, status]);
+  }, [isConnected, session, router, status, sessionStatus]);
 
   useEffect(() => {
     if (paymentConfirmed && phase === "waiting_payment") startGame();

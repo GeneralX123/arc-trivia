@@ -12,7 +12,7 @@ import Image from "next/image";
 
 export default function ProfilePage() {
   const { address, isConnected, status } = useAccount();
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const router = useRouter();
 
   const { data: playerData } = useReadContract({
@@ -25,8 +25,9 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (status === "reconnecting" || status === "connecting") return;
+    if (sessionStatus === "loading") return;
     if (!isConnected || !session?.user?.xUsername) router.push("/");
-  }, [isConnected, session, router, status]);
+  }, [isConnected, session, router, status, sessionStatus]);
 
   const hasPaid = playerData?.[0];
   const hasMinted = playerData?.[1];

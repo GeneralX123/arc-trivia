@@ -12,9 +12,6 @@ export default function LandingPage() {
   const { data: session } = useSession();
   const router = useRouter();
 
-  useEffect(() => {
-    if (isConnected && session?.user?.xUsername) router.push("/game");
-  }, [isConnected, session, router]);
 
   return (
     <>
