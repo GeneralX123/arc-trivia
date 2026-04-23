@@ -13,7 +13,7 @@ import { TopBar } from "@/components/TopBar";
 import Image from "next/image";
 
 type Question = { id: number; question: string; options: { label: string; text: string }[] };
-type Phase = "loading" | "paying" | "waiting_payment" | "playing" | "finished" | "already_played";
+type Phase = "loading" | "paying" | "waiting_payment" | "countdown" | "playing" | "finished" | "already_played";
 type PowerUps = { skip: boolean; extraTime: boolean; fiftyFifty: boolean };
 
 export default function GamePage() {
@@ -33,7 +33,8 @@ export default function GamePage() {
   const [timeLeft, setTimeLeft] = useState(10);
   const [maxTime, setMaxTime] = useState(10);
   const [powerUps, setPowerUps] = useState<PowerUps>({ skip: true, extraTime: true, fiftyFifty: true });
-  const [result, setResult] = useState<{ score: number; tier: number; tierName: string; signature: string } | null>(null);
+  const [result, setResult] = useState<{ score: number; tier: number; tierName: string; signature: string; minted?: boolean } | null>(null);
+  const [countdown, setCountdown] = useState(3);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const answeredRef = useRef(false);
   const handleAnswerRef = useRef<((opt: string | null) => Promise<void>) | null>(null);
@@ -104,8 +105,19 @@ export default function GamePage() {
     if (data.error === "Already played") { setPhase("already_played"); return; }
     setQuestions(data.questions);
     setReserveQuestions(data.reserve ?? []);
-    setPhase("playing");
-    startTimer();
+    setPhase("countdown");
+    let count = 3;
+    setCountdown(count);
+    const cdInterval = setInterval(() => {
+      count -= 1;
+      if (count <= 0) {
+        clearInterval(cdInterval);
+        setPhase("playing");
+        startTimer();
+      } else {
+        setCountdown(count);
+      }
+    }, 1000);
   }
 
   const handleAnswer = useCallback(async (optionText: string | null) => {
@@ -218,11 +230,8 @@ export default function GamePage() {
               <p className="text-4xl font-black">{result.score}<span className="text-indigo-400 text-xl">/20</span></p>
             </div>
           )}
-          {result && !result.minted && (
+          {result && (
             <MintButton score={result.score} tierId={result.tier} signature={result.signature} address={address!} />
-          )}
-          {result && result.minted && (
-            <p className="text-green-400 text-sm font-semibold">✓ SBT already minted on-chain</p>
           )}
           {result && (
             <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} target="_blank" rel="noopener noreferrer"
@@ -274,6 +283,17 @@ export default function GamePage() {
 
   if (phase === "waiting_payment") return (
     <Shell><div className="text-center space-y-4"><Spinner /><p className="text-indigo-200/60">Confirming on Arc Testnet...</p></div></Shell>
+  );
+
+  if (phase === "countdown") return (
+    <Shell>
+      <div className="text-center space-y-4">
+        <p className="text-indigo-300 text-lg font-semibold uppercase tracking-widest">Arc Trivia 1.0</p>
+        <p className="text-indigo-200/60 text-sm">Starting in</p>
+        <p className="text-9xl font-black text-indigo-400" style={{ transition: "all 0.3s" }}>{countdown}</p>
+        <p className="text-indigo-200/40 text-xs">Get ready...</p>
+      </div>
+    </Shell>
   );
 
   if (phase === "finished" && result && tier) {
