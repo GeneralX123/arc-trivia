@@ -14,12 +14,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Wallet address required" }, { status: 400 });
   }
 
-  // Check if player already has a completed game
-  const { data: existing } = await supabaseAdmin
+  // Check if player already has a completed game — by wallet OR by X username
+  const { data: existingByWallet } = await supabaseAdmin
     .from("players")
     .select("*")
     .eq("wallet_address", walletAddress.toLowerCase())
-    .single();
+    .maybeSingle();
+
+  const { data: existingByX } = await supabaseAdmin
+    .from("players")
+    .select("*")
+    .eq("x_username", session.user.xUsername)
+    .eq("game_completed", true)
+    .maybeSingle();
+
+  const existing = existingByWallet ?? existingByX;
 
   if (existing?.game_completed) {
     return NextResponse.json({ error: "Already played" }, { status: 403 });

@@ -195,14 +195,17 @@ export default function GamePage() {
     setMaxTime(m => m + 10);
   }
 
-  function useFiftyFifty() {
+  async function useFiftyFifty() {
     if (!powerUps.fiftyFifty || answeredRef.current || !questions[currentIndex]) return;
     playPowerup();
     setPowerUps(p => ({ ...p, fiftyFifty: false }));
     const q = questions[currentIndex];
-    const wrong = q.options.filter(o => o.text !== correctAnswer).map(o => o.text);
-    const toHide = wrong.sort(() => Math.random() - 0.5).slice(0, 2);
-    setHiddenOptions(toHide);
+    const res = await fetch("/api/game/hint", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ questionId: q.id, options: q.options.map(o => o.text) }),
+    });
+    const data = await res.json();
+    if (data.hide) setHiddenOptions(data.hide);
   }
 
   async function finishGame() {
