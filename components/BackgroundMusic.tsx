@@ -32,7 +32,7 @@ export function BackgroundMusic() {
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      <audio ref={audioRef} src={TRACK_SRC} loop preload="auto" />
+      <audio ref={audioRef} src={TRACK_SRC} loop preload="none" />
       <div className="flex flex-col items-center gap-1 bg-black/50 border border-indigo-500/20 rounded-xl px-2 py-2 backdrop-blur">
         <span className="text-[10px] text-indigo-400/50 uppercase tracking-widest">Vol</span>
         <div className="relative w-7 h-7 flex items-center justify-center">

@@ -37,13 +37,13 @@ export default function LandingPage() {
               <span className="text-indigo-500/60 text-3xl ml-1">1.0</span>
             </h1>
             <p className="text-indigo-200/70 text-lg font-medium">
-              20 questions. One Shot. Are you an Arc Maxi?
+              Are you an Arc Maxi?
             </p>
           </div>
 
           {/* Pills */}
           <div className="flex justify-center gap-2 flex-wrap">
-            {["15s Timer", "Ranked SBTs", "One Try Only"].map((s) => (
+            {["20 Questions", "Ranked SBTs", "One Try Only"].map((s) => (
               <span key={s} className="bg-indigo-950/60 border border-indigo-500/20 text-indigo-300 text-xs px-3 py-1.5 rounded-full">
                 {s}
               </span>
