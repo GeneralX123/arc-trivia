@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -11,7 +11,7 @@ import { TopBar } from "@/components/TopBar";
 import Image from "next/image";
 
 export default function ProfilePage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, status } = useAccount();
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -24,13 +24,28 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
+    if (status === "reconnecting" || status === "connecting") return;
     if (!isConnected || !session?.user?.xUsername) router.push("/");
-  }, [isConnected, session, router]);
+  }, [isConnected, session, router, status]);
 
   const hasPaid = playerData?.[0];
   const hasMinted = playerData?.[1];
-  const score = playerData?.[2] ?? 0;
-  const tierId = playerData?.[3] ?? 0;
+  const onChainScore = playerData?.[2] ?? 0;
+  const onChainTierId = playerData?.[3] ?? 0;
+
+  const [dbPlayer, setDbPlayer] = useState<{ played: boolean; score: number; tierId: number } | null>(null);
+
+  useEffect(() => {
+    if (!address || !session?.user?.xUsername) return;
+    fetch(`/api/game/player?wallet=${address}`)
+      .then(r => r.json())
+      .then(d => setDbPlayer(d))
+      .catch(() => {});
+  }, [address, session]);
+
+  const score = hasMinted ? onChainScore : (dbPlayer?.score ?? 0);
+  const tierId = hasMinted ? onChainTierId : (dbPlayer?.tierId ?? 0);
+  const hasPlayed = hasPaid || dbPlayer?.played;
   const tier = TIERS[tierId];
 
   const shareText = encodeURIComponent(
@@ -59,7 +74,7 @@ export default function ProfilePage() {
           </div>
 
           {/* SBT Card */}
-          {hasPaid ? (
+          {hasPlayed ? (
             <div className="glass-card p-6 text-center space-y-4">
               <p className="text-xs text-indigo-400 uppercase tracking-widest">Your Arc Trivia 1.0 SBT</p>
               {tier && <Image src={tier.image} alt={tier.name} width={160} height={160} className="mx-auto object-contain" />}

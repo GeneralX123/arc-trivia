@@ -5,7 +5,7 @@ const TRACK_SRC = "/Music/MIABKP.mp3";
 
 export function BackgroundMusic() {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [volume, setVolume] = useState(0.21);
+  const [volume, setVolume] = useState(0.15);
   const [started, setStarted] = useState(false);
 
   useEffect(() => {

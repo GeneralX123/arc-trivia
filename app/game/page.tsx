@@ -17,12 +17,13 @@ type Phase = "loading" | "paying" | "waiting_payment" | "playing" | "finished" |
 type PowerUps = { skip: boolean; extraTime: boolean; fiftyFifty: boolean };
 
 export default function GamePage() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, status } = useAccount();
   const { data: session } = useSession();
   const router = useRouter();
 
   const [phase, setPhase] = useState<Phase>("loading");
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [reserveQuestions, setReserveQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -41,8 +42,9 @@ export default function GamePage() {
   const { isSuccess: paymentConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
 
   useEffect(() => {
+    if (status === "reconnecting" || status === "connecting") return;
     if (!isConnected || !session?.user?.xUsername) router.push("/");
-  }, [isConnected, session, router]);
+  }, [isConnected, session, router, status]);
 
   useEffect(() => {
     if (paymentConfirmed && phase === "waiting_payment") startGame();
@@ -90,6 +92,7 @@ export default function GamePage() {
     const data = await res.json();
     if (data.error === "Already played") { setPhase("already_played"); return; }
     setQuestions(data.questions);
+    setReserveQuestions(data.reserve ?? []);
     setPhase("playing");
     startTimer();
   }
@@ -130,10 +133,21 @@ export default function GamePage() {
     if (timerRef.current) clearInterval(timerRef.current);
     answeredRef.current = true;
     setSelected("__skip__");
+
+    // Build updated question list: remove skipped, append replacement from reserve
+    const newQuestions = [...questions];
+    newQuestions.splice(currentIndex, 1);
+    const newReserve = [...reserveQuestions];
+    if (newReserve.length > 0) {
+      newQuestions.push(newReserve.shift()!);
+    }
+    setQuestions(newQuestions);
+    setReserveQuestions(newReserve);
+
     setTimeout(() => {
-      if (currentIndex + 1 >= questions.length) { finishGame(); }
-      else {
-        setCurrentIndex(i => i + 1);
+      if (currentIndex >= newQuestions.length) {
+        finishGame();
+      } else {
         setSelected(null); setCorrectAnswer(null); setHiddenOptions([]);
         answeredRef.current = false;
         startTimer(15);

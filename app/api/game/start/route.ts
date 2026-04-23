@@ -48,11 +48,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Failed to load questions" }, { status: 500 });
   }
 
-  // Shuffle all questions, then take 20
-  const shuffled = questions.sort(() => Math.random() - 0.5).slice(0, 20);
+  // Shuffle all questions, take 25 (20 active + 5 reserve for skip replacement)
+  const shuffled = questions.sort(() => Math.random() - 0.5).slice(0, 25);
 
-  // Shuffle options per question — track correct answer letter after shuffle
-  const prepared = shuffled.map((q) => {
+  const prepareQuestion = (q: typeof questions[0]) => {
     const options = [
       { label: "A", text: q.option_a },
       { label: "B", text: q.option_b },
@@ -60,9 +59,11 @@ export async function POST(req: NextRequest) {
       { label: "D", text: q.option_d },
     ].sort(() => Math.random() - 0.5)
       .map((opt, i) => ({ ...opt, label: ["A", "B", "C", "D"][i] }));
-
     return { id: q.id, question: q.question, options };
-  });
+  };
+
+  const active = shuffled.slice(0, 20).map(prepareQuestion);
+  const reserve = shuffled.slice(20).map(prepareQuestion);
 
   // Upsert player record — mark game as started
   await supabaseAdmin.from("players").upsert({
@@ -76,5 +77,5 @@ export async function POST(req: NextRequest) {
     current_question_index: 0,
   }, { onConflict: "wallet_address" });
 
-  return NextResponse.json({ questions: prepared });
+  return NextResponse.json({ questions: active, reserve });
 }
