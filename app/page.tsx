@@ -95,7 +95,6 @@ export default function LandingPage() {
             </button>
           )}
 
-          <p className="text-xs text-indigo-200/30">Entry fee: 2 USDC (testnet)</p>
         </div>
       </main>
     </>
