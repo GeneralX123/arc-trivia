@@ -230,7 +230,7 @@ export default function GamePage() {
 
   if (phase === "already_played") {
     const alreadyTier = result ? TIERS[result.tier] : null;
-    const shareText = result ? encodeURIComponent(`I just played Arc Trivia 1.0 and earned the "${alreadyTier?.name}" SBT with a score of ${result.score}/20! 🎮 Are you an Arc Maxi? #ArcTrivia #ArcNetwork`) : "";
+    const shareText = result ? encodeURIComponent(`I just played Arc Trivia 1.0 and earned the "${alreadyTier?.name}" SBT with a score of ${result.score}/20! 🎮\n\nAre you an Arc Maxi? Go Try it now`) : "";
     const shareUrl = encodeURIComponent(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/share/${address}`);
     return (
       <Shell>
@@ -328,7 +328,7 @@ export default function GamePage() {
   );
 
   if (phase === "finished" && result && tier) {
-    const shareText = encodeURIComponent(`I just played Arc Trivia 1.0 and earned the "${tier.name}" SBT with a score of ${result.score}/20! 🎮 Are you an Arc Maxi? #ArcTrivia #ArcNetwork`);
+    const shareText = encodeURIComponent(`I just played Arc Trivia 1.0 and earned the "${tier.name}" SBT with a score of ${result.score}/20! 🎮\n\nAre you an Arc Maxi? Go Try it now`);
     const shareUrl = encodeURIComponent(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/share/${address}`);
     return (
       <Shell>

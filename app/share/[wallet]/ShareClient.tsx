@@ -23,7 +23,7 @@ export default function ShareClient({ player, wallet }: { player: Player; wallet
 
   const tier = getTierForScore(player.score);
   const shareText = encodeURIComponent(
-    `I played Arc Trivia 1.0 and earned the "${tier.name}" SBT with a score of ${player.score}/20! 🎮 Are you an Arc Maxi? #ArcTrivia #ArcNetwork`
+    `I played Arc Trivia 1.0 and earned the "${tier.name}" SBT with a score of ${player.score}/20! 🎮\n\nAre you an Arc Maxi? Go Try it now`
   );
   const shareUrl = encodeURIComponent(`${process.env.NEXT_PUBLIC_BASE_URL ?? ""}/share/${wallet}`);
 
