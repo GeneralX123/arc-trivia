@@ -35,7 +35,7 @@ export function Sidebar() {
 
       {/* Learn more about Arc */}
       <div className="mt-auto flex flex-col items-center gap-2 pb-2">
-        <span className="text-[8px] text-indigo-400/40 uppercase tracking-widest text-center leading-tight px-1">Learn<br/>Arc</span>
+        <span className="text-[8px] text-indigo-400/40 uppercase tracking-widest text-center leading-tight px-1">Learn<br/>About<br/>Arc</span>
         <a href="https://x.com/arc" target="_blank" rel="noopener noreferrer"
           title="Arc X Page"
           className="w-10 h-10 rounded-xl flex items-center justify-center hover:bg-indigo-950/60 text-indigo-400 transition-all text-base">
