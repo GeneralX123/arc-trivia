@@ -39,6 +39,9 @@ export default function LandingPage() {
             <p className="text-indigo-200/70 text-lg font-medium">
               Are you an Arc Maxi?
             </p>
+            <p className="text-indigo-200/50 text-sm font-medium">
+              Test your knowledge of Circle, Arc Network and DeFi
+            </p>
           </div>
 
           {/* Pills */}
