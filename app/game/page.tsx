@@ -39,8 +39,9 @@ export default function GamePage() {
   const answeredRef = useRef(false);
   const handleAnswerRef = useRef<((opt: string | null) => Promise<void>) | null>(null);
 
-  const { writeContract, data: txHash } = useWriteContract();
-  const { isSuccess: paymentConfirmed } = useWaitForTransactionReceipt({ hash: txHash });
+  const [payError, setPayError] = useState<string | null>(null);
+  const { writeContract, data: txHash, isError: writeFailed, error: writeError } = useWriteContract();
+  const { isSuccess: paymentConfirmed, isError: receiptFailed, error: receiptError } = useWaitForTransactionReceipt({ hash: txHash });
 
   const { data: playerOnChain, refetch: refetchOnChain } = useReadContract({
     address: CONTRACT_ADDRESS,
@@ -61,6 +62,16 @@ export default function GamePage() {
   useEffect(() => {
     if (paymentConfirmed && phase === "waiting_payment") startGame();
   }, [paymentConfirmed, phase]);
+
+  useEffect(() => {
+    const err = writeFailed ? writeError : receiptFailed ? receiptError : null;
+    if (!err || phase !== "waiting_payment") return;
+    const msg = err.message ?? "";
+    if (/insufficient|balance|funds/i.test(msg)) setPayError("Insufficient USDC balance to pay the entry fee.");
+    else if (/rejected|denied|cancel/i.test(msg)) setPayError("Transaction rejected. Please try again.");
+    else setPayError("Transaction failed. Please try again.");
+    setPhase("paying");
+  }, [writeFailed, receiptFailed]);
 
   useEffect(() => {
     if (!address || !session) return;
@@ -100,6 +111,7 @@ export default function GamePage() {
 
   async function payEntry() {
     if (!address || !CONTRACT_ADDRESS) return;
+    setPayError(null);
     try {
       writeContract({ address: CONTRACT_ADDRESS, abi: ARC_TRIVIA_ABI, functionName: "enterGame", value: parseEther("2") });
       setPhase("waiting_payment");
@@ -307,6 +319,11 @@ export default function GamePage() {
           </ul>
         </div>
 
+        {payError && (
+          <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400 text-center">
+            {payError}
+          </div>
+        )}
         <button onClick={payEntry} className="btn-primary">Pay & Start Game →</button>
       </div>
     </Shell>
