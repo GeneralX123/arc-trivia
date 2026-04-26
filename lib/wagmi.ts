@@ -6,7 +6,7 @@ export const arcTestnet = defineChain({
   id: 5042002,
   name: "Arc Testnet",
   nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
-  rpcUrls: { default: { http: ["https://rpc.testnet.arc.network", "https://arc-testnet.drpc.org"] } },
+  rpcUrls: { default: { http: ["https://arc-testnet.drpc.org", "https://rpc.testnet.arc.network"] } },
   blockExplorers: {
     default: { name: "ArcScan", url: "https://testnet.arcscan.app" },
   },
@@ -19,8 +19,8 @@ export const wagmiConfig = getDefaultConfig({
   chains: [arcTestnet],
   transports: {
     [arcTestnet.id]: fallback([
-      http("https://rpc.testnet.arc.network"),
       http("https://arc-testnet.drpc.org"),
+      http("https://rpc.testnet.arc.network"),
     ]),
   },
   ssr: true,
