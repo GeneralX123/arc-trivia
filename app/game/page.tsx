@@ -97,7 +97,7 @@ export default function GamePage() {
     checkPlayed();
   }, [address, session]);
 
-  function startTimer(duration = 15) {
+  function startTimer(duration = 20) {
     if (timerRef.current) clearInterval(timerRef.current);
     setTimeLeft(duration);
     setMaxTime(duration);
@@ -166,7 +166,7 @@ export default function GamePage() {
         setCurrentIndex(i => i + 1);
         setSelected(null); setCorrectAnswer(null); setHiddenOptions([]);
         answeredRef.current = false;
-        startTimer(15);
+        startTimer(20);
       }
     }, 1300);
   }, [currentIndex, questions, address]);
@@ -196,7 +196,7 @@ export default function GamePage() {
       } else {
         setSelected(null); setCorrectAnswer(null); setHiddenOptions([]);
         answeredRef.current = false;
-        startTimer(15);
+        startTimer(20);
       }
     }, 600);
   }
@@ -307,7 +307,7 @@ export default function GamePage() {
         <div className="glass-card p-5 space-y-3">
           <p className="text-sm font-bold text-indigo-300 uppercase tracking-widest">How to Play</p>
           <ul className="space-y-2 text-sm text-indigo-200/70">
-            <li className="flex items-start gap-2"><span className="text-indigo-400 mt-0.5">→</span>20 questions, 15 seconds each. Answer before time runs out.</li>
+            <li className="flex items-start gap-2"><span className="text-indigo-400 mt-0.5">→</span>20 questions, 20 seconds each. Answer before time runs out.</li>
             <li className="flex items-start gap-2"><span className="text-indigo-400 mt-0.5">→</span>Each user can only play <span className="text-white font-semibold">once</span>. Make it count.</li>
             <li className="flex items-start gap-2"><span className="text-indigo-400 mt-0.5">→</span>If you quit or refresh mid-game, your score locks in automatically.</li>
           </ul>
